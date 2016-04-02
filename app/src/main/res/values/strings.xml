@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Peer Wifi</string>
+
+    <string name="ssid_placeholder">ssid</string>
+    <string name="price_placeholder">price</string>
+    <string name="limit_placeholder">limit</string>
 </resources>
