@@ -36,18 +36,25 @@ public class HostActivity extends Activity {
         WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         wifiManager.startScan();
 
-        wifi_items = new ArrayList<>();
+        wifi_items = new ArrayList<Wifi_Item>();
 
         List<ScanResult> list = wifiManager.getScanResults();
         for(ScanResult i : list) {
-            Wifi_Item wifi_item = new Wifi_Item();
-            wifi_item.setSSID(i.SSID);
-            wifi_item.setPrice(new BigDecimal("5.00"));
-            wifi_item.setLimit(500);
-
-            wifi_items.add(wifi_item);
+            boolean added = false;
+            for (Wifi_Item item : wifi_items) {
+                if (item.getSSID().equals(i.SSID)) {
+                    added = true;
+                    break;
+                }
+            }
+            if (!added) {
+                Wifi_Item wifi_item = new Wifi_Item();
+                wifi_item.setSSID(i.SSID);
+                wifi_item.setPrice(new BigDecimal("5.00"));
+                wifi_item.setLimit(500);
+                wifi_items.add(wifi_item);
+            }
         }
-
 
         WifiAdapter wifiAdapter = new WifiAdapter();
         wifi_list.setAdapter(wifiAdapter);
