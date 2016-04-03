@@ -6,9 +6,15 @@ import android.content.Intent;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.peerwifi.peerwifi.core.Wifi_Item;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -17,6 +23,7 @@ import java.util.Random;
 public class ParentActivity extends Activity {
 
     private Wifi_Item wifi_item;
+
 
     public boolean isConnected(){
         return (wifi_item != null);
@@ -31,28 +38,50 @@ public class ParentActivity extends Activity {
     }
 
     public void disconnect(){
-
-//        ParseQuery<ParseObject> query = ParseQuery.getQuery("WifiItem");
-//        query.getInBackground(wifi_id, new GetCallback<ParseObject>() {
-//            @Override
-//            public void done(ParseObject object, ParseException e) {
-//                if(e == null){
-//                    object.deleteEventually();
-//                }
-//            }
-//        });
-
         configApState(getApplicationContext());
         wifi_item = null;
+
+        Intent intent = new Intent(ParentActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 
-    public void checkConnection(){
-        if(isConnected()){
-            Intent intent = new Intent(ParentActivity.this, ConnectedActivity.class);
-            intent.putExtra("WifiItem", wifi_item);
-            startActivity(intent);
-            finish();
-        }
+    public void checkConnection(WifiConfiguration wifiConfiguration){
+
+        ParseQuery<ParseObject> parseQuery = new ParseQuery<>("WifiItem");
+        parseQuery.whereContains("SSID", wifiConfiguration.SSID);
+        parseQuery.whereContains("password", wifiConfiguration.preSharedKey);
+
+        parseQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if(e == null){
+
+                    if(objects.size() == 1){
+                        ParseObject parseObject = objects.get(0);
+                        Wifi_Item wifi_item = new Wifi_Item();
+                        wifi_item.setId(parseObject.getObjectId());
+                        wifi_item.setSSID(parseObject.getString("SSID"));
+                        wifi_item.setPrice(new BigDecimal(parseObject.getInt("price")));
+                        wifi_item.setDuration(parseObject.getInt("duration"));
+
+                        Intent intent = new Intent(ParentActivity.this, HostingActivity.class);
+                        intent.putExtra("WifiItem", wifi_item);
+                        startActivity(intent);
+                        finish();
+
+                    } else if(objects.size() > 1){
+                        for(ParseObject object : objects){
+                            object.deleteEventually();
+                        }
+
+                        disconnect();
+                    }
+
+                }
+            }
+        });
+
     }
 
 
@@ -109,6 +138,8 @@ public class ParentActivity extends Activity {
         }
         return false;
     }
+
+
 
 
 

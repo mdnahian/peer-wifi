@@ -1,8 +1,11 @@
 package com.peerwifi.peerwifi.activities;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,6 +20,8 @@ import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 import com.peerwifi.peerwifi.R;
 
+import java.lang.reflect.Method;
+
 /**
  * Created by mdislam on 4/2/16.
  */
@@ -29,12 +34,12 @@ public class LoginActivity extends ParentActivity {
     TextView loginBtn;
     TextView skipBtn;
 
+    private WifiManager wifiManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        checkConnection();
 
         try {
             Parse.enableLocalDatastore(this);
@@ -43,6 +48,11 @@ public class LoginActivity extends ParentActivity {
         } catch (Exception e){
             Log.d("Crash", "Application Crashed. Error Report Sent");
         }
+
+
+        wifiManager = (WifiManager) getBaseContext().getSystemService(Context.WIFI_SERVICE);
+        WifiConfiguration wifiConfiguration = getWifiApConfiguration();
+        checkConnection(wifiConfiguration);
 
 
         if(ParseUser.getCurrentUser() != null){
@@ -126,5 +136,18 @@ public class LoginActivity extends ParentActivity {
 
 
     }
+
+
+
+    public WifiConfiguration getWifiApConfiguration() {
+        try {
+            Method method = wifiManager.getClass().getMethod("getWifiApConfiguration");
+            return (WifiConfiguration) method.invoke(wifiManager);
+        } catch (Exception e) {
+            Log.e("Crash", e.getMessage());
+            return null;
+        }
+    }
+
 
 }

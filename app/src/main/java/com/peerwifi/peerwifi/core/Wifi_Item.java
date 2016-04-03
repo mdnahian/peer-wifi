@@ -17,7 +17,8 @@ public class Wifi_Item implements Serializable {
     private Date date;
     private double speed;
     private double distanceInMiles;
-    private double limit;
+//    private double limit;
+    private int duration;
 
     public String getId() {
         return id;
@@ -91,11 +92,20 @@ public class Wifi_Item implements Serializable {
         this.distanceInMiles = distanceInMiles;
     }
 
-    public double getLimit() {
-        return limit;
+//    public double getLimit() {
+//        return limit;
+//    }
+//
+//    public void setLimit(double limit) {
+//        this.limit = limit;
+//    }
+
+
+    public int getDuration() {
+        return duration;
     }
 
-    public void setLimit(double limit) {
-        this.limit = limit;
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 }

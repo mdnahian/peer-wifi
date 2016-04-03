@@ -1,11 +1,17 @@
 package com.peerwifi.peerwifi.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.peerwifi.peerwifi.R;
+
+import java.lang.reflect.Method;
 
 /**
  * Created by mdislam on 4/3/16.
@@ -13,12 +19,16 @@ import com.peerwifi.peerwifi.R;
 public class MainActivity extends ParentActivity {
 
 
+    private WifiManager wifiManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        checkConnection();
+        wifiManager = (WifiManager) getBaseContext().getSystemService(Context.WIFI_SERVICE);
+        WifiConfiguration wifiConfiguration = getWifiApConfiguration();
+        checkConnection(wifiConfiguration);
 
         TextView hostBtn = (TextView) findViewById(R.id.hostBtn);
         hostBtn.setOnClickListener(new View.OnClickListener() {
@@ -50,5 +60,19 @@ public class MainActivity extends ParentActivity {
         startActivity(intent);
         finish();
     }
+
+
+
+
+    public WifiConfiguration getWifiApConfiguration() {
+        try {
+            Method method = wifiManager.getClass().getMethod("getWifiApConfiguration");
+            return (WifiConfiguration) method.invoke(wifiManager);
+        } catch (Exception e) {
+            Log.e("Crash", e.getMessage());
+            return null;
+        }
+    }
+
 
 }

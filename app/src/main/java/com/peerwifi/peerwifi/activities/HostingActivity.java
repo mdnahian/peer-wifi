@@ -11,7 +11,7 @@ import com.peerwifi.peerwifi.core.Wifi_Item;
 /**
  * Created by mdislam on 4/3/16.
  */
-public class ConnectedActivity extends ParentActivity {
+public class HostingActivity extends ParentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,14 +29,14 @@ public class ConnectedActivity extends ParentActivity {
 
         ssid.setText(wifi_item.getSSID());
         price.setText("$"+wifi_item.getPrice());
-        limit.setText(Double.toString(wifi_item.getLimit())+" Mb");
+        limit.setText(Double.toString(wifi_item.getDuration())+" minutes");
 
         TextView disconnectBtn = (TextView) findViewById(R.id.disconnectBtn);
         disconnectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 disconnect();
-                checkConnection(ConnectedActivity.this);
+                checkConnection(HostingActivity.this);
             }
         });
     }

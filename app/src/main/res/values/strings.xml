@@ -3,7 +3,7 @@
 
     <string name="ssid_placeholder">SSID:</string>
     <string name="price_placeholder">Price:</string>
-    <string name="limit_placeholder">Data Limit (Mb):</string>
+    <string name="limit_placeholder">Time (minutes):</string>
 
     <string name="user_label">Username:</string>
     <string name="pass_label">Password:</string>

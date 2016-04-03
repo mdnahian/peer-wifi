@@ -37,7 +37,9 @@ public class HostActivity extends ParentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.host_activity);
 
-        checkConnection();
+        wifiManager = (WifiManager) getBaseContext().getSystemService(Context.WIFI_SERVICE);
+        WifiConfiguration wifiConfiguration = getWifiApConfiguration();
+        checkConnection(wifiConfiguration);
 
         if(ParseUser.getCurrentUser() == null){
             Intent intent = new Intent(HostActivity.this, LoginActivity.class);
@@ -48,26 +50,25 @@ public class HostActivity extends ParentActivity {
 
         final EditText ssid = (EditText) findViewById(R.id.ssid);
         final EditText price = (EditText) findViewById(R.id.price);
-        final EditText limit = (EditText) findViewById(R.id.limit);
+        final EditText time = (EditText) findViewById(R.id.time);
 
-        wifiManager = (WifiManager) getBaseContext().getSystemService(Context.WIFI_SERVICE);
-        WifiConfiguration wifiConfiguration = getWifiApConfiguration();
+
         ssid.setText(wifiConfiguration.SSID);
         ssid.setEnabled(false);
 
         price.setText("5.00");
-        limit.setText("500");
+        time.setText("30");
 
 
         TextView startBtn = (TextView) findViewById(R.id.startBtn);
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!price.getText().toString().equals("") && !limit.getText().equals("")){
+                if(!price.getText().toString().equals("") && !time.getText().equals("")){
                     BigDecimal newPrice = new BigDecimal(price.getText().toString());
-                    int newLimit = Integer.parseInt(limit.getText().toString());
+                    int newTime = Integer.parseInt(time.getText().toString());
 
-                    startHotspot(newPrice, newLimit);
+                    startHotspot(newPrice, newTime);
 
                 } else {
 
@@ -93,7 +94,7 @@ public class HostActivity extends ParentActivity {
 
 
 
-    private void startHotspot(final BigDecimal price, final int limit){
+    private void startHotspot(final BigDecimal price, final int time){
 
         if(wifiManager.isWifiEnabled()) {
             wifiManager.setWifiEnabled(false);
@@ -111,7 +112,7 @@ public class HostActivity extends ParentActivity {
             parseObject.put("SSID", getWifiApConfiguration().SSID);
             parseObject.put("password", getWifiApConfiguration().preSharedKey);
             parseObject.put("price", price);
-            parseObject.put("limit", limit);
+            parseObject.put("time", time);
 
             parseObject.saveInBackground(new SaveCallback() {
                 @Override
@@ -122,12 +123,12 @@ public class HostActivity extends ParentActivity {
                         wifi_item.setId(parseObject.getObjectId());
                         wifi_item.setSSID(getWifiApConfiguration().SSID);
                         wifi_item.setPrice(price);
-                        wifi_item.setLimit(limit);
+                        wifi_item.setDuration(time);
                         wifi_item.setPassword(getWifiApConfiguration().preSharedKey);
 
                         setWifi_item(wifi_item);
 
-                        Intent intent = new Intent(HostActivity.this, ConnectedActivity.class);
+                        Intent intent = new Intent(HostActivity.this, HostingActivity.class);
                         intent.putExtra("WifiItem", wifi_item);
                         startActivity(intent);
                         finish();

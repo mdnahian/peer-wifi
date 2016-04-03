@@ -2,6 +2,7 @@ package com.peerwifi.peerwifi.core;
 
 import android.app.Service;
 import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -20,12 +21,16 @@ public class WifiConnectionService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Let it continue running until it is stopped.
-        Toast.makeText(this, "Service Started", Toast.LENGTH_LONG).show();
+
+        final int time = intent.getIntExtra("time", 0);
+
+
+        Toast.makeText(this, "Connected to Peer Wifi", Toast.LENGTH_LONG).show();
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while(counter < 120) {
+                while(counter < time) {
                     counter++;
                     try {
                         Thread.sleep(1000);
@@ -42,9 +47,11 @@ public class WifiConnectionService extends Service {
 
     @Override
     public void onDestroy() {
-        stopSelf();
         super.onDestroy();
-        Toast.makeText(this, counter + " Count When running", Toast.LENGTH_LONG).show();
+        stopSelf();
+        Toast.makeText(this, counter + "Disconnected from Peer Wifi", Toast.LENGTH_LONG).show();
+        WifiManager wifiManager = (WifiManager)getSystemService(WIFI_SERVICE);
+        wifiManager.disconnect();
     }
 
 }

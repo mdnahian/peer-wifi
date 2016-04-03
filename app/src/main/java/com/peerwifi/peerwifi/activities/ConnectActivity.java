@@ -30,10 +30,12 @@ import com.paypal.android.sdk.payments.PayPalService;
 import com.paypal.android.sdk.payments.PaymentActivity;
 import com.paypal.android.sdk.payments.PaymentConfirmation;
 import com.peerwifi.peerwifi.R;
+import com.peerwifi.peerwifi.core.WifiConnectionService;
 import com.peerwifi.peerwifi.core.Wifi_Item;
 
 import org.json.JSONException;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,12 +48,16 @@ public class ConnectActivity extends ParentActivity {
     ArrayList<Wifi_Item> wifi_items;
     private static PayPalConfiguration config = new PayPalConfiguration();
 
+    private WifiManager wifiManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.connect_activity);
 
-        checkConnection();
+        wifiManager = (WifiManager) getBaseContext().getSystemService(Context.WIFI_SERVICE);
+        WifiConfiguration wifiConfiguration = getWifiApConfiguration();
+        checkConnection(wifiConfiguration);
 
         config.environment(PayPalConfiguration.ENVIRONMENT_NO_NETWORK);
         config.clientId(getString(R.string.paypalAPIKey));
@@ -91,7 +97,7 @@ public class ConnectActivity extends ParentActivity {
                 Wifi_Item wifi_item = new Wifi_Item();
                 wifi_item.setSSID(i.SSID);
                 wifi_item.setPrice(new BigDecimal("5.00"));
-                wifi_item.setLimit(500);
+                wifi_item.setDuration(30);
                 wifi_items.add(wifi_item);
             }
         }
@@ -114,7 +120,7 @@ public class ConnectActivity extends ParentActivity {
                                 wifi_item.setId(object.getObjectId());
                                 wifi_item.setPassword(object.getString("password"));
                                 wifi_item.setPrice(new BigDecimal(object.getInt("price")));
-                                wifi_item.setLimit(object.getDouble("limit"));
+                                wifi_item.setDuration(object.getInt("time"));
 
                                 wifi_items.add(wifi_item);
 
@@ -197,12 +203,12 @@ public class ConnectActivity extends ParentActivity {
             }
 
             final TextView ssid = (TextView) convertView.findViewById(R.id.ssid);
-            final TextView limit = (TextView) convertView.findViewById(R.id.limit);
+            final TextView time = (TextView) convertView.findViewById(R.id.time);
             final TextView price = (TextView) convertView.findViewById(R.id.price);
 
 
             ssid.setText(wifi_item.getSSID());
-            limit.setText(Double.toString(wifi_item.getLimit())+" Mb");
+            time.setText(Double.toString(wifi_item.getDuration())+" minutes");
             price.setText("$"+wifi_item.getPrice());
 
 
@@ -279,12 +285,18 @@ public class ConnectActivity extends ParentActivity {
                     // see https://developer.paypal.com/webapps/developer/docs/integration/mobile/verify-mobile-payment/
                     // for more details.
 
+                    Intent service = new Intent(ConnectActivity.this, WifiConnectionService.class);
+                    service.putExtra("time", getWifi_item().getDuration()*60);
+                    startService(service);
+
                     if(ParseUser.getCurrentUser() != null){
                         ParseObject parseObject = new ParseObject("WifiConnection");
                         parseObject.put("userId", ParseUser.getCurrentUser().getObjectId());
                         parseObject.put("wifi_item", getWifi_item());
 
-                        checkConnection();
+                        wifiManager = (WifiManager) getBaseContext().getSystemService(Context.WIFI_SERVICE);
+                        WifiConfiguration wifiConfiguration = getWifiApConfiguration();
+                        checkConnection(wifiConfiguration);
                     } else {
                         Intent intent = new Intent(ConnectActivity.this, LoginActivity.class);
                         startActivity(intent);
@@ -304,6 +316,16 @@ public class ConnectActivity extends ParentActivity {
 
 
 
+
+    public WifiConfiguration getWifiApConfiguration() {
+        try {
+            Method method = wifiManager.getClass().getMethod("getWifiApConfiguration");
+            return (WifiConfiguration) method.invoke(wifiManager);
+        } catch (Exception e) {
+            Log.e("Crash", e.getMessage());
+            return null;
+        }
+    }
 
 
 
