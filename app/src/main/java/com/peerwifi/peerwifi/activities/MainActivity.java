@@ -1,6 +1,5 @@
 package com.peerwifi.peerwifi.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -11,7 +10,7 @@ import com.peerwifi.peerwifi.R;
 /**
  * Created by mdislam on 4/3/16.
  */
-public class MainActivity extends Activity {
+public class MainActivity extends ParentActivity {
 
 
     @Override
@@ -19,6 +18,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        checkConnection();
 
         TextView hostBtn = (TextView) findViewById(R.id.hostBtn);
         hostBtn.setOnClickListener(new View.OnClickListener() {

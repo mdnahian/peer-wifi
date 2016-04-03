@@ -1,6 +1,5 @@
 package com.peerwifi.peerwifi.activities;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,7 +18,7 @@ import com.peerwifi.peerwifi.R;
 /**
  * Created by mdislam on 4/2/16.
  */
-public class SignupActivity extends Activity {
+public class SignupActivity extends ParentActivity {
 
     EditText user_field;
     EditText pass_field;
@@ -35,6 +34,8 @@ public class SignupActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        checkConnection();
 
         user_field = (EditText)findViewById(R.id.user_field);
         phone_field = (EditText) findViewById(R.id.phone_field);

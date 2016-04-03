@@ -1,6 +1,5 @@
 package com.peerwifi.peerwifi.activities;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,16 +17,16 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.peerwifi.peerwifi.R;
+import com.peerwifi.peerwifi.core.Wifi_Item;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.Random;
 
 /**
  * Created by mdislam on 4/3/16.
  */
-public class HostActivity extends Activity {
+public class HostActivity extends ParentActivity {
 
 
     private WifiManager wifiManager;
@@ -37,6 +36,8 @@ public class HostActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.host_activity);
+
+        checkConnection();
 
         if(ParseUser.getCurrentUser() == null){
             Intent intent = new Intent(HostActivity.this, LoginActivity.class);
@@ -49,7 +50,9 @@ public class HostActivity extends Activity {
         final EditText price = (EditText) findViewById(R.id.price);
         final EditText limit = (EditText) findViewById(R.id.limit);
 
-        ssid.setText("peer-wifi-" + ParseUser.getCurrentUser().getUsername());
+        wifiManager = (WifiManager) getBaseContext().getSystemService(Context.WIFI_SERVICE);
+        WifiConfiguration wifiConfiguration = getWifiApConfiguration();
+        ssid.setText(wifiConfiguration.SSID);
         ssid.setEnabled(false);
 
         price.setText("5.00");
@@ -64,7 +67,7 @@ public class HostActivity extends Activity {
                     BigDecimal newPrice = new BigDecimal(price.getText().toString());
                     int newLimit = Integer.parseInt(limit.getText().toString());
 
-                    startHotspot(ssid.getText().toString(), newPrice, newLimit);
+                    startHotspot(newPrice, newLimit);
 
                 } else {
 
@@ -90,43 +93,49 @@ public class HostActivity extends Activity {
 
 
 
-    private void startHotspot(String ssid, BigDecimal price, int limit){
+    private void startHotspot(final BigDecimal price, final int limit){
 
-        boolean isStarted;
-
-        String newPassword = generateRandomString();
-
-        wifiManager = (WifiManager) getBaseContext().getSystemService(Context.WIFI_SERVICE);
         if(wifiManager.isWifiEnabled()) {
             wifiManager.setWifiEnabled(false);
         }
 
+        WifiConfiguration wifi_configuration = null;
+
         try {
-            if(changeConfiguration(ssid, newPassword)){
-                isStarted = true;
-            } else {
-                isStarted = false;
-            }
-        } catch (Exception e) {
-            Log.d("Crash", e.getMessage());
-            isStarted = false;
-        }
+            //USE REFLECTION TO GET METHOD "SetWifiAPEnabled"
+            Method method = wifiManager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
+            method.invoke(wifiManager, wifi_configuration, true);
 
-
-
-        if(isStarted){
-
-            ParseObject parseObject = new ParseObject("WifiItem");
+            final ParseObject parseObject = new ParseObject("WifiItem");
             parseObject.put("userId", ParseUser.getCurrentUser().getObjectId());
-            parseObject.put("SSID", ssid);
-            parseObject.put("password", newPassword);
+            parseObject.put("SSID", getWifiApConfiguration().SSID);
+            parseObject.put("password", getWifiApConfiguration().preSharedKey);
             parseObject.put("price", price);
             parseObject.put("limit", limit);
 
             parseObject.saveInBackground(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
-                    if(e == null){
+                    if (e == null) {
+
+                        Wifi_Item wifi_item = new Wifi_Item();
+                        wifi_item.setId(parseObject.getObjectId());
+                        wifi_item.setSSID(getWifiApConfiguration().SSID);
+                        wifi_item.setPrice(price);
+                        wifi_item.setLimit(limit);
+                        wifi_item.setPassword(getWifiApConfiguration().preSharedKey);
+
+                        setWifi_item(wifi_item);
+
+                        Intent intent = new Intent(HostActivity.this, ConnectedActivity.class);
+                        intent.putExtra("WifiItem", wifi_item);
+                        startActivity(intent);
+                        finish();
+
+                    } else {
+
+                        disconnect();
+
                         new AlertDialog.Builder(HostActivity.this)
                                 .setTitle("Failed to Start Hotspot")
                                 .setMessage("Are you logged in?")
@@ -137,26 +146,26 @@ public class HostActivity extends Activity {
                                 })
                                 .setIcon(R.drawable.wifi)
                                 .show();
-                    } else {
+
 
                     }
                 }
             });
 
 
-        } else {
-            new AlertDialog.Builder(HostActivity.this)
-                    .setTitle("Failed to Start Hotspot")
-                    .setMessage("Please make sure all fields are valid.")
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    })
-                    .setIcon(R.drawable.wifi)
-                    .show();
         }
-
+        catch (NoSuchMethodException a) {
+            a.printStackTrace();
+        }
+        catch (IllegalArgumentException a) {
+            a.printStackTrace();
+        }
+        catch (IllegalAccessException a) {
+            a.printStackTrace();
+        }
+        catch (InvocationTargetException a) {
+            a.printStackTrace();
+        }
 
 
 
@@ -166,11 +175,7 @@ public class HostActivity extends Activity {
 
 
 
-
-
-
-
-    private WifiConfiguration getWifiApConfiguration() {
+    public WifiConfiguration getWifiApConfiguration() {
         try {
             Method method = wifiManager.getClass().getMethod("getWifiApConfiguration");
             return (WifiConfiguration) method.invoke(wifiManager);
@@ -180,47 +185,9 @@ public class HostActivity extends Activity {
         }
     }
 
-    private boolean changeConfiguration(String newSSID, String newPassword) {
-
-        WifiConfiguration mWifiConfiguration = getWifiApConfiguration();
-
-        if(mWifiConfiguration != null){
-            Log.d("Crash", mWifiConfiguration.SSID);
-            mWifiConfiguration.SSID = newSSID;
-            mWifiConfiguration.preSharedKey = newPassword;
-            mWifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-            mWifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
-
-            try {
-                Method method = wifiManager.getClass().getMethod("setWifiApConfiguration", HostActivity.class);
-                Object s = method.invoke(wifiManager, mWifiConfiguration, true);
-                Log.d("Crash", s.toString());
-
-            } catch (IllegalAccessException e) {
-                Log.d("Crash", e.getMessage());
-            } catch (InvocationTargetException e) {
-                Log.d("Crash", e.getMessage());
-            } catch (NoSuchMethodException e) {
-                Log.d("Crash", e.getMessage());
-            }
-        } else {
-            Log.d("Crash", "Returned False...");
-        }
 
 
-        return false;
-    }
 
-    private static String generateRandomString(){
-        char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-        StringBuilder sb = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < 20; i++) {
-            char c = chars[random.nextInt(chars.length)];
-            sb.append(c);
-        }
-        return sb.toString();
-    }
 
 
 

@@ -21,8 +21,14 @@
     <string name="parseAppId">n7A6qPZb5ucpp9TRiLkkBstBJgp3n0lmhUEbtUta</string>
     <string name="parseClientId">GCmUehOM2OPR3N5qthZl2tWsbV6wxZaOau5Ae3fo</string>
 
+    <string name="paypalAPIKey"></string>
+
     <string name="phone">Phone:</string>
     <string name="email">Email:</string>
 
     <string name="start">Start Hotspot</string>
+
+    <string name="rescan">Rescan</string>
+
+    <string name="disconnect">Disconnect</string>
 </resources>

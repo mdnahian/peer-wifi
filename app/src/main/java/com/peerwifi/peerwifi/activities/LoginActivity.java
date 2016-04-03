@@ -1,6 +1,5 @@
 package com.peerwifi.peerwifi.activities;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,7 +20,7 @@ import com.peerwifi.peerwifi.R;
 /**
  * Created by mdislam on 4/2/16.
  */
-public class LoginActivity extends Activity {
+public class LoginActivity extends ParentActivity {
 
     EditText user_field;
     EditText pass_field;
@@ -34,6 +33,8 @@ public class LoginActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        checkConnection();
 
         try {
             Parse.enableLocalDatastore(this);

@@ -1,13 +1,15 @@
 package com.peerwifi.peerwifi.core;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
 /**
  * Created by mdislam on 4/2/16.
  */
-public class Wifi_Item {
+public class Wifi_Item implements Serializable {
 
+    private String id;
     private String SSID;
     private String password;
     private User user;
@@ -16,6 +18,14 @@ public class Wifi_Item {
     private double speed;
     private double distanceInMiles;
     private double limit;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getSSID() {
         return SSID;
