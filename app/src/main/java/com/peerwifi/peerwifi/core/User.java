@@ -1,21 +1,17 @@
 package com.peerwifi.peerwifi.core;
 
+import java.io.Serializable;
+
 /**
  * Created by mdislam on 4/2/16.
  */
-public class User {
+public class User implements Serializable {
 
     private String username;
     private String password;
     private String payPalEmail;
     private BankingInfo bankingInfo;
 
-    public User(String username, String password, String payPalEmail, BankingInfo bankingInfo) {
-        this.username = username;
-        this.password = password;
-        this.payPalEmail = payPalEmail;
-        this.bankingInfo = bankingInfo;
-    }
 
     public String getUsername() {
         return username;

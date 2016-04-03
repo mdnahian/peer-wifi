@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
 
 
     <application
@@ -15,7 +16,7 @@
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
         <activity
-            android:name=".activities.HostActivity"
+            android:name=".activities.LoginActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,6 +26,28 @@
         </activity>
 
 
+
+        <activity android:name=".activities.ConnectActivity"
+            android:screenOrientation="portrait">
+
+        </activity>
+
+
+        <activity android:name=".activities.HostActivity"
+            android:screenOrientation="portrait">
+
+        </activity>
+
+
+        <activity android:name=".activities.MainActivity"
+            android:screenOrientation="portrait">
+
+        </activity>
+
+        <activity android:name=".activities.SignupActivity"
+            android:screenOrientation="portrait">
+
+        </activity>
 
 
 

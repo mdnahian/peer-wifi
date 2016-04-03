@@ -23,5 +23,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.1'
-    compile 'org.mongodb:mongo-java-driver:3.0.3'
+    compile 'com.parse.bolts:bolts-android:1.+'
+    compile 'com.parse:parse-android:1.+'
+    compile 'com.paypal.sdk:paypal-android-sdk:2.13.3'
 }

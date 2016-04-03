@@ -1,13 +1,28 @@
 <resources>
     <string name="app_name">Peer Wifi</string>
 
-    <string name="ssid_placeholder">ssid</string>
-    <string name="price_placeholder">price</string>
-    <string name="limit_placeholder">limit</string>
+    <string name="ssid_placeholder">SSID:</string>
+    <string name="price_placeholder">Price:</string>
+    <string name="limit_placeholder">Data Limit (Mb):</string>
 
     <string name="user_label">Username:</string>
     <string name="pass_label">Password:</string>
-    <string name="confirm_label">Confirm Password</string>
+    <string name="confirm_label">Confirm Password:</string>
     <string name="signup">Sign Up</string>
     <string name="signin">Sign In</string>
+    <string name="skip">Skip</string>
+
+    <string name="connect">Connect to Hotspot</string>
+    <string name="host">Host Your Hotspot</string>
+
+    <string name="connectBtn">Connect</string>
+    <string name="hostBtn">Host</string>
+
+    <string name="parseAppId">n7A6qPZb5ucpp9TRiLkkBstBJgp3n0lmhUEbtUta</string>
+    <string name="parseClientId">GCmUehOM2OPR3N5qthZl2tWsbV6wxZaOau5Ae3fo</string>
+
+    <string name="phone">Phone:</string>
+    <string name="email">Email:</string>
+
+    <string name="start">Start Hotspot</string>
 </resources>

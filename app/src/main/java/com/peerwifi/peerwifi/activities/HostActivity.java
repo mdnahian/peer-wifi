@@ -1,105 +1,225 @@
 package com.peerwifi.peerwifi.activities;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
-import android.net.wifi.ScanResult;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.peerwifi.peerwifi.R;
-import com.peerwifi.peerwifi.core.Wifi_Item;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Random;
 
 /**
- * Created by mdislam on 4/2/16.
+ * Created by mdislam on 4/3/16.
  */
 public class HostActivity extends Activity {
 
-    ArrayList<Wifi_Item> wifi_items;
+
+    private WifiManager wifiManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.host_activity);
 
-        ListView wifi_list = (ListView) findViewById(R.id.wifi_list);
-
-        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        wifiManager.startScan();
-
-        wifi_items = new ArrayList<Wifi_Item>();
-
-        List<ScanResult> list = wifiManager.getScanResults();
-        for(ScanResult i : list) {
-            boolean added = false;
-            for (Wifi_Item item : wifi_items) {
-                if (item.getSSID().equals(i.SSID)) {
-                    added = true;
-                    break;
-                }
-            }
-            if (!added) {
-                Wifi_Item wifi_item = new Wifi_Item();
-                wifi_item.setSSID(i.SSID);
-                wifi_item.setPrice(new BigDecimal("5.00"));
-                wifi_item.setLimit(500);
-                wifi_items.add(wifi_item);
-            }
+        if(ParseUser.getCurrentUser() == null){
+            Intent intent = new Intent(HostActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
         }
 
-        WifiAdapter wifiAdapter = new WifiAdapter();
-        wifi_list.setAdapter(wifiAdapter);
+
+        final EditText ssid = (EditText) findViewById(R.id.ssid);
+        final EditText price = (EditText) findViewById(R.id.price);
+        final EditText limit = (EditText) findViewById(R.id.limit);
+
+        ssid.setText("peer-wifi-" + ParseUser.getCurrentUser().getUsername());
+        ssid.setEnabled(false);
+
+        price.setText("5.00");
+        limit.setText("500");
+
+
+        TextView startBtn = (TextView) findViewById(R.id.startBtn);
+        startBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!price.getText().toString().equals("") && !limit.getText().equals("")){
+                    BigDecimal newPrice = new BigDecimal(price.getText().toString());
+                    int newLimit = Integer.parseInt(limit.getText().toString());
+
+                    startHotspot(ssid.getText().toString(), newPrice, newLimit);
+
+                } else {
+
+                    new AlertDialog.Builder(HostActivity.this)
+                            .setTitle("Could Not Start Hotspot")
+                            .setMessage("Please fill all fields and try again.")
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            })
+                            .setIcon(R.drawable.wifi)
+                            .show();
+
+                }
+            }
+        });
+
 
     }
 
 
-    private class WifiAdapter extends ArrayAdapter<Wifi_Item>{
 
-        public WifiAdapter() {
-            super(getApplicationContext(), R.layout.wifi_list_item, wifi_items);
+
+
+    private void startHotspot(String ssid, BigDecimal price, int limit){
+
+        boolean isStarted;
+
+        String newPassword = generateRandomString();
+
+        wifiManager = (WifiManager) getBaseContext().getSystemService(Context.WIFI_SERVICE);
+        if(wifiManager.isWifiEnabled()) {
+            wifiManager.setWifiEnabled(false);
         }
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-
-            Wifi_Item wifi_item = getItem(position);
-
-            if(convertView == null){
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.wifi_list_item, parent, false);
+        try {
+            if(changeConfiguration(ssid, newPassword)){
+                isStarted = true;
+            } else {
+                isStarted = false;
             }
-
-            TextView ssid = (TextView) convertView.findViewById(R.id.ssid);
-            TextView limit = (TextView) convertView.findViewById(R.id.limit);
-            TextView price = (TextView) convertView.findViewById(R.id.price);
-
-
-            ssid.setText(wifi_item.getSSID());
-            limit.setText(Double.toString(wifi_item.getLimit())+" Mb");
-            price.setText("$"+wifi_item.getPrice());
+        } catch (Exception e) {
+            Log.d("Crash", e.getMessage());
+            isStarted = false;
+        }
 
 
 
-            convertView.setOnClickListener(new View.OnClickListener() {
+        if(isStarted){
+
+            ParseObject parseObject = new ParseObject("WifiItem");
+            parseObject.put("userId", ParseUser.getCurrentUser().getObjectId());
+            parseObject.put("SSID", ssid);
+            parseObject.put("password", newPassword);
+            parseObject.put("price", price);
+            parseObject.put("limit", limit);
+
+            parseObject.saveInBackground(new SaveCallback() {
                 @Override
-                public void onClick(View v) {
+                public void done(ParseException e) {
+                    if(e == null){
+                        new AlertDialog.Builder(HostActivity.this)
+                                .setTitle("Failed to Start Hotspot")
+                                .setMessage("Are you logged in?")
+                                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                    }
+                                })
+                                .setIcon(R.drawable.wifi)
+                                .show();
+                    } else {
 
+                    }
                 }
             });
 
 
-            return convertView;
+        } else {
+            new AlertDialog.Builder(HostActivity.this)
+                    .setTitle("Failed to Start Hotspot")
+                    .setMessage("Please make sure all fields are valid.")
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    })
+                    .setIcon(R.drawable.wifi)
+                    .show();
         }
 
 
+
+
+
+
+    }
+
+
+
+
+
+
+
+    private WifiConfiguration getWifiApConfiguration() {
+        try {
+            Method method = wifiManager.getClass().getMethod("getWifiApConfiguration");
+            return (WifiConfiguration) method.invoke(wifiManager);
+        } catch (Exception e) {
+            Log.e("Crash", e.getMessage());
+            return null;
+        }
+    }
+
+    private boolean changeConfiguration(String newSSID, String newPassword) {
+
+        WifiConfiguration mWifiConfiguration = getWifiApConfiguration();
+
+        if(mWifiConfiguration != null){
+            Log.d("Crash", mWifiConfiguration.SSID);
+            mWifiConfiguration.SSID = newSSID;
+            mWifiConfiguration.preSharedKey = newPassword;
+            mWifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+            mWifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+
+            try {
+                Method method = wifiManager.getClass().getMethod("setWifiApConfiguration", HostActivity.class);
+                Object s = method.invoke(wifiManager, mWifiConfiguration, true);
+                Log.d("Crash", s.toString());
+
+            } catch (IllegalAccessException e) {
+                Log.d("Crash", e.getMessage());
+            } catch (InvocationTargetException e) {
+                Log.d("Crash", e.getMessage());
+            } catch (NoSuchMethodException e) {
+                Log.d("Crash", e.getMessage());
+            }
+        } else {
+            Log.d("Crash", "Returned False...");
+        }
+
+
+        return false;
+    }
+
+    private static String generateRandomString(){
+        char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 20; i++) {
+            char c = chars[random.nextInt(chars.length)];
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
 
