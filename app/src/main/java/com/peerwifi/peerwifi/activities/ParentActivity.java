@@ -49,6 +49,7 @@ public class ParentActivity extends Activity {
     public void checkConnection(){
         if(isConnected()){
             Intent intent = new Intent(ParentActivity.this, ConnectedActivity.class);
+            intent.putExtra("WifiItem", wifi_item);
             startActivity(intent);
             finish();
         }

@@ -23,6 +23,7 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 import com.paypal.android.sdk.payments.PayPalConfiguration;
 import com.paypal.android.sdk.payments.PayPalPayment;
 import com.paypal.android.sdk.payments.PayPalService;
@@ -112,7 +113,7 @@ public class ConnectActivity extends ParentActivity {
 
                                 wifi_item.setId(object.getObjectId());
                                 wifi_item.setPassword(object.getString("password"));
-                                wifi_item.setPrice(new BigDecimal(object.getString("price")));
+                                wifi_item.setPrice(new BigDecimal(object.getInt("price")));
                                 wifi_item.setLimit(object.getDouble("limit"));
 
                                 wifi_items.add(wifi_item);
@@ -251,7 +252,6 @@ public class ConnectActivity extends ParentActivity {
         protected void onPreExecute() {
             super.onPreExecute();
             setWifi_item(wifi_item);
-            checkConnection();
 
             PayPalPayment payment = new PayPalPayment(wifi_item.getPrice(), "USD", "Peer Wifi - "+wifi_item.getSSID(), PayPalPayment.PAYMENT_INTENT_SALE);
 
@@ -279,7 +279,17 @@ public class ConnectActivity extends ParentActivity {
                     // see https://developer.paypal.com/webapps/developer/docs/integration/mobile/verify-mobile-payment/
                     // for more details.
 
+                    if(ParseUser.getCurrentUser() != null){
+                        ParseObject parseObject = new ParseObject("WifiConnection");
+                        parseObject.put("userId", ParseUser.getCurrentUser().getObjectId());
+                        parseObject.put("wifi_item", getWifi_item());
 
+                        checkConnection();
+                    } else {
+                        Intent intent = new Intent(ConnectActivity.this, LoginActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
 
                 } catch (JSONException e) {
                     Log.e("Crash", "an extremely unlikely failure occurred: ", e);
