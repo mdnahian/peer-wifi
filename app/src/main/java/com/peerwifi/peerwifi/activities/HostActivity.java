@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.parse.ParseException;
@@ -64,7 +65,7 @@ public class HostActivity extends ParentActivity {
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!price.getText().toString().equals("") && !time.getText().equals("")){
+                if (!price.getText().toString().equals("") && !time.getText().equals("")) {
                     BigDecimal newPrice = new BigDecimal(price.getText().toString());
                     int newTime = Integer.parseInt(time.getText().toString());
 
@@ -86,6 +87,20 @@ public class HostActivity extends ParentActivity {
                 }
             }
         });
+
+
+
+        ImageView backBtn = (ImageView) findViewById(R.id.backBtn);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HostActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+
 
 
     }

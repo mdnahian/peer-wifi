@@ -2,10 +2,13 @@ package com.peerwifi.peerwifi.core;
 
 import android.app.Service;
 import android.content.Intent;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
+
+import java.util.List;
 
 /**
  * Created by mdislam on 4/3/16.
@@ -43,6 +46,7 @@ public class WifiConnectionService extends Service {
 
                 WifiManager wifiManager = (WifiManager)getSystemService(WIFI_SERVICE);
                 wifiManager.disconnect();
+                forgetNetwork(wifiManager);
 
                 stopSelf();
             }
@@ -59,5 +63,17 @@ public class WifiConnectionService extends Service {
         WifiManager wifiManager = (WifiManager)getSystemService(WIFI_SERVICE);
         wifiManager.disconnect();
     }
+
+
+
+    public void forgetNetwork(WifiManager wifiManager) {
+        List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+        for( WifiConfiguration i : list ) {
+            wifiManager.removeNetwork(i.networkId);
+            wifiManager.saveConfiguration();
+        }
+    }
+
+
 
 }

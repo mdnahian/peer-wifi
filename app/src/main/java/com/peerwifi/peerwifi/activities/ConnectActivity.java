@@ -310,6 +310,7 @@ public class ConnectActivity extends ParentActivity {
         } else {
             WifiManager wifiManager = (WifiManager)getSystemService(WIFI_SERVICE);
             wifiManager.disconnect();
+            forgetNetwork(wifiManager);
         }
 
     }

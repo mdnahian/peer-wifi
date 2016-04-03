@@ -154,7 +154,13 @@ public class ParentActivity extends Activity {
     }
 
 
-
+    public void forgetNetwork(WifiManager wifiManager) {
+        List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+        for( WifiConfiguration i : list ) {
+            wifiManager.removeNetwork(i.networkId);
+            wifiManager.saveConfiguration();
+        }
+    }
 
 
 
