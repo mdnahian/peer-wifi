@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 /**
@@ -23,7 +24,7 @@ public class WifiConnectionService extends Service {
         // Let it continue running until it is stopped.
 
         final int time = intent.getIntExtra("time", 0);
-
+        Log.d("Crash", Integer.toString(time));
 
         Toast.makeText(this, "Connected to Peer Wifi", Toast.LENGTH_LONG).show();
 
@@ -34,6 +35,7 @@ public class WifiConnectionService extends Service {
                     counter++;
                     try {
                         Thread.sleep(1000);
+                        Log.d("Crash", "1 Second");
                     } catch (Exception e) {
 
                     }
@@ -50,8 +52,9 @@ public class WifiConnectionService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         stopSelf();
+        super.onDestroy();
+
         Toast.makeText(this, counter + "Disconnected from Peer Wifi", Toast.LENGTH_LONG).show();
         WifiManager wifiManager = (WifiManager)getSystemService(WIFI_SERVICE);
         wifiManager.disconnect();
