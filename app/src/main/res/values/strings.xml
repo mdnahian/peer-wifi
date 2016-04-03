@@ -4,4 +4,10 @@
     <string name="ssid_placeholder">ssid</string>
     <string name="price_placeholder">price</string>
     <string name="limit_placeholder">limit</string>
+
+    <string name="user_label">Username:</string>
+    <string name="pass_label">Password:</string>
+    <string name="confirm_label">Confirm Password</string>
+    <string name="signup">Sign Up</string>
+    <string name="signin">Sign In</string>
 </resources>
