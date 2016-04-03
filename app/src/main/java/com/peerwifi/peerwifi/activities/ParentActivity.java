@@ -37,16 +37,34 @@ public class ParentActivity extends Activity {
         return wifi_item;
     }
 
-    public void disconnect(){
-        configApState(getApplicationContext());
-        wifi_item = null;
+    public void disconnect(WifiConfiguration wifiConfiguration){
 
-        Intent intent = new Intent(ParentActivity.this, LoginActivity.class);
-        startActivity(intent);
-        finish();
+        ParseQuery<ParseObject> parseQuery = new ParseQuery<>("WifiItem");
+        parseQuery.whereContains("SSID", wifiConfiguration.SSID);
+        parseQuery.whereContains("password", wifiConfiguration.preSharedKey);
+
+        parseQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e == null) {
+                    for (ParseObject object : objects) {
+                        object.deleteEventually();
+                    }
+
+                    configApState(getApplicationContext());
+                    wifi_item = null;
+
+                    Intent intent = new Intent(ParentActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                    finish();
+
+                }
+            }
+        });
+
     }
 
-    public void checkConnection(WifiConfiguration wifiConfiguration){
+    public void checkConnection(final WifiConfiguration wifiConfiguration){
 
         ParseQuery<ParseObject> parseQuery = new ParseQuery<>("WifiItem");
         parseQuery.whereContains("SSID", wifiConfiguration.SSID);
@@ -71,11 +89,7 @@ public class ParentActivity extends Activity {
                         finish();
 
                     } else if(objects.size() > 1){
-                        for(ParseObject object : objects){
-                            object.deleteEventually();
-                        }
-
-                        disconnect();
+                        disconnect(wifiConfiguration);
                     }
 
                 }
@@ -85,9 +99,9 @@ public class ParentActivity extends Activity {
     }
 
 
-    public void checkConnection(Context context){
+    public void checkConnection(Context context, WifiConfiguration wifiConfiguration){
         if(!isConnected()){
-            disconnect();
+            disconnect(wifiConfiguration);
             Intent intent = new Intent(ParentActivity.this, MainActivity.class);
             startActivity(intent);
             finish();

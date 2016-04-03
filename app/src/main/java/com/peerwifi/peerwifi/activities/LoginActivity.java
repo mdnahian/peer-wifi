@@ -54,7 +54,6 @@ public class LoginActivity extends ParentActivity {
         WifiConfiguration wifiConfiguration = getWifiApConfiguration();
         checkConnection(wifiConfiguration);
 
-
         if(ParseUser.getCurrentUser() != null){
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);

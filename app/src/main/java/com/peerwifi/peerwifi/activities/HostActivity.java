@@ -100,7 +100,7 @@ public class HostActivity extends ParentActivity {
             wifiManager.setWifiEnabled(false);
         }
 
-        WifiConfiguration wifi_configuration = null;
+        final WifiConfiguration wifi_configuration = null;
 
         try {
             //USE REFLECTION TO GET METHOD "SetWifiAPEnabled"
@@ -135,7 +135,7 @@ public class HostActivity extends ParentActivity {
 
                     } else {
 
-                        disconnect();
+                        disconnect(wifi_configuration);
 
                         new AlertDialog.Builder(HostActivity.this)
                                 .setTitle("Failed to Start Hotspot")

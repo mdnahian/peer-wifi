@@ -39,6 +39,9 @@ public class WifiConnectionService extends Service {
                     }
                 }
 
+                WifiManager wifiManager = (WifiManager)getSystemService(WIFI_SERVICE);
+                wifiManager.disconnect();
+
                 stopSelf();
             }
         }).start();
