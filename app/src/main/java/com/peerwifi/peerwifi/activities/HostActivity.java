@@ -2,7 +2,7 @@ package com.peerwifi.peerwifi.activities;
 
 import android.app.Activity;
 import android.content.Context;
-import android.net.wifi.WifiConfiguration;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -38,12 +38,13 @@ public class HostActivity extends Activity {
 
         wifi_items = new ArrayList<>();
 
-        List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
-        for(WifiConfiguration i : list) {
+        List<ScanResult> list = wifiManager.getScanResults();
+        for(ScanResult i : list) {
             Wifi_Item wifi_item = new Wifi_Item();
             wifi_item.setSSID(i.SSID);
             wifi_item.setPrice(new BigDecimal("5.00"));
             wifi_item.setLimit(500);
+
             wifi_items.add(wifi_item);
         }
 
@@ -52,9 +53,6 @@ public class HostActivity extends Activity {
         wifi_list.setAdapter(wifiAdapter);
 
     }
-
-
-
 
 
     private class WifiAdapter extends ArrayAdapter<Wifi_Item>{
@@ -80,6 +78,15 @@ public class HostActivity extends Activity {
             ssid.setText(wifi_item.getSSID());
             limit.setText(Double.toString(wifi_item.getLimit())+" Mb");
             price.setText("$"+wifi_item.getPrice());
+
+
+
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
 
 
             return convertView;
