@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - "6.0.0"
+  - "5.3.0"
+  - "4.2.4"
+addons:
+  hosts:
+    - test.local.com
+    - test2.local.com
+    - test3.local.com
+after_success:
+  - ./node_modules/.bin/jscoverage tests tests-cov
+  - ./node_modules/.bin/mocha tests/**.js -R mocha-lcov-reporter | ./node_modules/coveralls/bin/coveralls.js

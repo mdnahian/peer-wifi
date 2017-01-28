@@ -1,0 +1,16 @@
+{
+  "name": "peer-wifi.com",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "diet": "^0.10.7",
+    "diet-static": "^2.2.0",
+    "ect": "^0.5.9"
+  }
+}
